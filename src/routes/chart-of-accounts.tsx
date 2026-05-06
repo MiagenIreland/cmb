@@ -34,6 +34,14 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useRole } from "@/lib/roles";
 import { logAudit } from "@/lib/audit";
+import {
+  addMapping,
+  batchApproveByManager,
+  updateMappingStatus,
+  useMappings,
+  type Mapping,
+  type MappingStatus,
+} from "@/lib/mappings";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -42,30 +50,9 @@ export const Route = createFileRoute("/chart-of-accounts")({
   component: CoAPage,
 });
 
-type Status = "Approved" | "Pending" | "Rejected";
-
-interface Mapping {
-  id: string;
-  smCode: string;
-  smDescription: string;
-  cmbCode: string;
-  cmbDescription: string;
-  status: Status;
-  shipManager: string;
-  comment?: string;
-}
+type Status = MappingStatus;
 
 const SHIP_MANAGERS = ["Oceanic Ship Mgmt", "Northern Marine", "Desert Shipping", "Tropic Marine"];
-
-const INITIAL: Mapping[] = [
-  { id: "1", smCode: "OSM-5010", smDescription: "Wages — Officers", cmbCode: "5010", cmbDescription: "Crew Wages", status: "Approved", shipManager: "Oceanic Ship Mgmt" },
-  { id: "2", smCode: "OSM-5020", smDescription: "Crew Travel Exp.", cmbCode: "5020", cmbDescription: "Crew Travel", status: "Approved", shipManager: "Oceanic Ship Mgmt" },
-  { id: "3", smCode: "NM-5110", smDescription: "Lub Oil Consumption", cmbCode: "5110", cmbDescription: "Lubricating Oil", status: "Pending", shipManager: "Northern Marine" },
-  { id: "4", smCode: "NM-5120-D", smDescription: "Deck Stores Issued", cmbCode: "5120", cmbDescription: "Stores — Deck", status: "Pending", shipManager: "Northern Marine" },
-  { id: "5", smCode: "DS-5210", smDescription: "Maint. & Survey", cmbCode: "5210", cmbDescription: "Repairs & Maintenance", status: "Pending", shipManager: "Desert Shipping" },
-  { id: "6", smCode: "TM-5410", smDescription: "Port Disbursements", cmbCode: "5410", cmbDescription: "Port Charges", status: "Rejected", shipManager: "Tropic Marine" },
-  { id: "7", smCode: "OSM-5310", smDescription: "Hull Insurance", cmbCode: "5310", cmbDescription: "Insurance — H&M", status: "Approved", shipManager: "Oceanic Ship Mgmt" },
-];
 
 const STATUS_CLASS: Record<Status, string> = {
   Approved: "bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300",
@@ -92,7 +79,7 @@ const EMPTY_FORM: FormState = { smCode: "", smDescription: "", cmbCode: "", cmbD
 
 function CoAPage() {
   const { user, role, permissions } = useRole();
-  const [rows, setRows] = useState<Mapping[]>(INITIAL);
+  const rows = useMappings();
   const [tab, setTab] = useState("mapping");
   const [dialogMode, setDialogMode] = useState<null | "add" | "remap">(null);
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
@@ -103,15 +90,17 @@ function CoAPage() {
 
   const updateStatus = (id: string, status: Status) => {
     const row = rows.find((r) => r.id === id);
-    setRows((rs) => rs.map((r) => (r.id === id ? { ...r, status } : r)));
-    if (row) {
+    const updated = updateMappingStatus(id, status, user.name);
+    if (row && updated) {
       logAudit({
         user: user.name,
         role,
         action: status === "Approved" ? "Approve Mapping" : "Reject Mapping",
         target: `${row.smCode} → ${row.cmbCode}`,
-        details: row.shipManager,
+        details: `${row.shipManager} · ${status === "Approved" ? "Mapping approved" : "Mapping rejected"}`,
+        relatedId: row.id,
       });
+      toast.success(`Mapping ${status.toLowerCase()}`);
     }
   };
 
@@ -120,38 +109,34 @@ function CoAPage() {
       toast.error("SM CoA code and CMB CoA code are required");
       return;
     }
-    const newRow: Mapping = {
-      id: crypto.randomUUID(),
+    const newRow = addMapping({
       smCode: form.smCode,
       smDescription: form.smDescription,
       cmbCode: form.cmbCode,
       cmbDescription: form.cmbDescription,
-      status: "Pending",
       shipManager: user.company,
       comment: form.comment || undefined,
-    };
-    setRows((rs) => [newRow, ...rs]);
-    toast.success(dialogMode === "add" ? "Account submitted for approval" : "Remap submitted for approval");
+      submittedBy: user.name,
+      submittedAt: new Date().toISOString(),
+      status: "Pending",
+    });
+    toast.success(dialogMode === "add" ? "Account sent for approval" : "Remap sent for approval");
     logAudit({
       user: user.name,
       role,
       action: dialogMode === "add" ? "Add Account" : "Remap Account",
       target: `${newRow.smCode} → ${newRow.cmbCode}`,
-      details: form.comment || undefined,
+      details: `Sent for approval${form.comment ? ` · ${form.comment}` : ""}`,
+      relatedId: newRow.id,
     });
     setDialogMode(null);
     setForm(EMPTY_FORM);
+    setTab("pending");
   };
 
   const batchApprove = (sm: string) => {
-    let count = 0;
-    setRows((rs) => rs.map((r) => {
-      if (r.shipManager === sm && r.status === "Pending") {
-        count++;
-        return { ...r, status: "Approved" };
-      }
-      return r;
-    }));
+    const approved = batchApproveByManager(sm, user.name);
+    const count = approved.length;
     toast.success(`Approved ${count} pending entr${count === 1 ? "y" : "ies"} for ${sm}`);
     logAudit({
       user: user.name,
