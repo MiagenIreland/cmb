@@ -59,6 +59,7 @@ function AuditTrailPage() {
   const entries = useAuditLog();
   const [query, setQuery] = useState("");
   const [actionFilter, setActionFilter] = useState<(typeof ACTION_FILTERS)[number]>("All");
+  const [selected, setSelected] = useState<AuditEntry | null>(null);
 
   useEffect(() => {
     if (!permissions.isSuperAdmin) navigate({ to: "/" });
@@ -169,7 +170,11 @@ function AuditTrailPage() {
                 </TableRow>
               ) : (
                 filtered.map((e) => (
-                  <TableRow key={e.id}>
+                  <TableRow
+                    key={e.id}
+                    onClick={() => setSelected(e)}
+                    className="cursor-pointer hover:bg-muted/50"
+                  >
                     <TableCell className="text-xs text-muted-foreground whitespace-nowrap">
                       {fmt(e.timestamp)}
                     </TableCell>
@@ -187,6 +192,48 @@ function AuditTrailPage() {
           </Table>
         </CardContent>
       </Card>
+
+      <Sheet open={!!selected} onOpenChange={(o) => !o && setSelected(null)}>
+        <SheetContent className="sm:max-w-md">
+          <SheetHeader>
+            <SheetTitle>Audit entry</SheetTitle>
+            <SheetDescription>Full record of this captured action.</SheetDescription>
+          </SheetHeader>
+          {selected && (
+            <dl className="mt-6 space-y-4 text-sm">
+              <Detail label="Action">
+                <Badge variant="secondary" className="font-normal">{selected.action}</Badge>
+              </Detail>
+              <Detail label="When">{fmt(selected.timestamp)}</Detail>
+              <Detail label="Entry ID"><span className="font-mono text-xs">{selected.id}</span></Detail>
+              <div className="border-t pt-4 space-y-4">
+                <Detail label="User">{selected.user}</Detail>
+                <Detail label="Role">{selected.role}</Detail>
+              </div>
+              <div className="border-t pt-4 space-y-4">
+                <Detail label="Target"><span className="font-mono text-xs">{selected.target}</span></Detail>
+                <Detail label="Details">{selected.details ?? "—"}</Detail>
+              </div>
+              <div className="border-t pt-4">
+                <Detail label="Raw">
+                  <pre className="mt-1 rounded bg-muted p-3 text-xs overflow-auto">
+{JSON.stringify(selected, null, 2)}
+                  </pre>
+                </Detail>
+              </div>
+            </dl>
+          )}
+        </SheetContent>
+      </Sheet>
+    </div>
+  );
+}
+
+function Detail({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="grid grid-cols-[110px_1fr] gap-3 items-start">
+      <dt className="text-xs uppercase tracking-wide text-muted-foreground">{label}</dt>
+      <dd className="text-sm">{children}</dd>
     </div>
   );
 }
