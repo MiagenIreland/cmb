@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Home, BookOpen, Ship, Shield } from "lucide-react";
+import { Home, BookOpen, Ship, Shield, ScrollText } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -19,10 +19,11 @@ const items = [
   { title: "Chart of Accounts", url: "/chart-of-accounts", icon: BookOpen },
   { title: "Vessel Listing", url: "/vessels", icon: Ship },
   { title: "Admin", url: "/admin", icon: Shield },
+  { title: "Audit Trail", url: "/audit-trail", icon: ScrollText },
 ];
 
 const NAV_BY_ROLE: Record<Role, string[]> = {
-  "Super Admin": ["Home", "Chart of Accounts", "Vessel Listing", "Admin"],
+  "Super Admin": ["Home", "Chart of Accounts", "Vessel Listing", "Admin", "Audit Trail"],
   "Ship Manager (Vessel Accounts)": ["Home", "Chart of Accounts"],
   "Ship Manager (Vessel Responsible)": ["Home", "Chart of Accounts"],
   Approver: ["Home", "Chart of Accounts"],
