@@ -24,8 +24,7 @@ const items = [
 
 const NAV_BY_ROLE: Record<Role, string[]> = {
   "Super Admin": ["Home", "Chart of Accounts", "Vessel Listing", "Admin", "Audit Trail"],
-  "Ship Manager (Vessel Accounts)": ["Home", "Chart of Accounts"],
-  "Ship Manager (Vessel Responsible)": ["Home", "Chart of Accounts"],
+  "Ship Manager": ["Home", "Chart of Accounts"],
   Approver: ["Home", "Chart of Accounts"],
   "Reporting Group Admin": ["Home"],
 };

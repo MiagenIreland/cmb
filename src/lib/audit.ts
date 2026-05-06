@@ -29,7 +29,7 @@ const SEED: AuditEntry[] = [
     id: "a1",
     timestamp: new Date(Date.now() - 1000 * 60 * 60 * 26).toISOString(),
     user: "Priya Nair",
-    role: "Ship Manager (Vessel Accounts)",
+    role: "Ship Manager",
     action: "Add Account",
     target: "OSM-5410 → 5410",
     details: "Submitted Port Disbursements mapping · Sent for approval",

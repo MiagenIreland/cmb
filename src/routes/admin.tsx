@@ -39,16 +39,14 @@ export const Route = createFileRoute("/admin")({
 
 type AdminRole =
   | "Super Admin"
-  | "Ship Manager (Accounts)"
-  | "Ship Manager (Vessel Responsible)"
+  | "Ship Manager"
   | "Approver"
   | "Fleet Manager"
   | "Reporting Group Admin";
 
 const ROLE_OPTIONS: AdminRole[] = [
   "Super Admin",
-  "Ship Manager (Accounts)",
-  "Ship Manager (Vessel Responsible)",
+  "Ship Manager",
   "Approver",
   "Fleet Manager",
   "Reporting Group Admin",
@@ -86,8 +84,8 @@ const INITIAL_USERS: AdminUser[] = [
   { id: "u1", name: "Katrine", email: "katrine@cmb.com", company: "CMB", role: "Super Admin" },
   { id: "u2", name: "Markos", email: "markos@cmb.com", company: "CMB", role: "Super Admin" },
   { id: "u3", name: "Colm", email: "colm@miagen.com", company: "Miagen", role: "Super Admin" },
-  { id: "u4", name: "Lynne", email: "lynne@bs-shipping.com", company: "Bernard Schulte", role: "Ship Manager (Accounts)", scope: "MV Atlantic Star" },
-  { id: "u5", name: "Joe", email: "joe@bs-shipping.com", company: "Bernard Schulte", role: "Ship Manager (Vessel Responsible)", scope: "MV Pacific Dawn" },
+  { id: "u4", name: "Lynne", email: "lynne@bs-shipping.com", company: "Bernard Schulte", role: "Ship Manager", scope: "MV Atlantic Star" },
+  { id: "u5", name: "Joe", email: "joe@bs-shipping.com", company: "Bernard Schulte", role: "Ship Manager", scope: "MV Pacific Dawn" },
   { id: "u6", name: "James", email: "james@cmb.com", company: "CMB", role: "Fleet Manager" },
   { id: "u7", name: "Marius", email: "marius@goldenocean.com", company: "Golden Ocean", role: "Reporting Group Admin", scope: "Golden Ocean" },
 ];
@@ -99,7 +97,7 @@ const INITIAL_GROUPS: Group[] = [
 ];
 
 function needsScope(role: AdminRole): "vessel" | "group" | null {
-  if (role === "Ship Manager (Accounts)" || role === "Ship Manager (Vessel Responsible)") return "vessel";
+  if (role === "Ship Manager") return "vessel";
   if (role === "Reporting Group Admin") return "group";
   return null;
 }
