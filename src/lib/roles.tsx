@@ -76,9 +76,7 @@ export function RoleProvider({ children }: { children: ReactNode }) {
   const value = useMemo<Ctx>(() => {
     const user = USERS[role];
     const isSuperAdmin = role === "Super Admin";
-    const isShipManager =
-      role === "Ship Manager (Vessel Accounts)" ||
-      role === "Ship Manager (Vessel Responsible)";
+    const isShipManager = role === "Ship Manager";
     const canApprove = role === "Approver" || isSuperAdmin;
     const canEditCoA = isShipManager;
 
