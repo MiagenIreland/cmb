@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Home, FileBarChart, BookOpen, Ship, Scale, Shield } from "lucide-react";
+import { Home, BookOpen, Ship, Shield } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,

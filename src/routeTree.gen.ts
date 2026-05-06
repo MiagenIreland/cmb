@@ -10,9 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as VesselsRouteImport } from './routes/vessels'
-import { Route as OpexReportsRouteImport } from './routes/opex-reports'
 import { Route as ChartOfAccountsRouteImport } from './routes/chart-of-accounts'
-import { Route as BalanceSheetRouteImport } from './routes/balance-sheet'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 
@@ -21,19 +19,9 @@ const VesselsRoute = VesselsRouteImport.update({
   path: '/vessels',
   getParentRoute: () => rootRouteImport,
 } as any)
-const OpexReportsRoute = OpexReportsRouteImport.update({
-  id: '/opex-reports',
-  path: '/opex-reports',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ChartOfAccountsRoute = ChartOfAccountsRouteImport.update({
   id: '/chart-of-accounts',
   path: '/chart-of-accounts',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const BalanceSheetRoute = BalanceSheetRouteImport.update({
-  id: '/balance-sheet',
-  path: '/balance-sheet',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminRoute = AdminRouteImport.update({
@@ -50,61 +38,34 @@ const IndexRoute = IndexRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
-  '/balance-sheet': typeof BalanceSheetRoute
   '/chart-of-accounts': typeof ChartOfAccountsRoute
-  '/opex-reports': typeof OpexReportsRoute
   '/vessels': typeof VesselsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
-  '/balance-sheet': typeof BalanceSheetRoute
   '/chart-of-accounts': typeof ChartOfAccountsRoute
-  '/opex-reports': typeof OpexReportsRoute
   '/vessels': typeof VesselsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
-  '/balance-sheet': typeof BalanceSheetRoute
   '/chart-of-accounts': typeof ChartOfAccountsRoute
-  '/opex-reports': typeof OpexReportsRoute
   '/vessels': typeof VesselsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths:
-    | '/'
-    | '/admin'
-    | '/balance-sheet'
-    | '/chart-of-accounts'
-    | '/opex-reports'
-    | '/vessels'
+  fullPaths: '/' | '/admin' | '/chart-of-accounts' | '/vessels'
   fileRoutesByTo: FileRoutesByTo
-  to:
-    | '/'
-    | '/admin'
-    | '/balance-sheet'
-    | '/chart-of-accounts'
-    | '/opex-reports'
-    | '/vessels'
-  id:
-    | '__root__'
-    | '/'
-    | '/admin'
-    | '/balance-sheet'
-    | '/chart-of-accounts'
-    | '/opex-reports'
-    | '/vessels'
+  to: '/' | '/admin' | '/chart-of-accounts' | '/vessels'
+  id: '__root__' | '/' | '/admin' | '/chart-of-accounts' | '/vessels'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
-  BalanceSheetRoute: typeof BalanceSheetRoute
   ChartOfAccountsRoute: typeof ChartOfAccountsRoute
-  OpexReportsRoute: typeof OpexReportsRoute
   VesselsRoute: typeof VesselsRoute
 }
 
@@ -117,25 +78,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof VesselsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/opex-reports': {
-      id: '/opex-reports'
-      path: '/opex-reports'
-      fullPath: '/opex-reports'
-      preLoaderRoute: typeof OpexReportsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/chart-of-accounts': {
       id: '/chart-of-accounts'
       path: '/chart-of-accounts'
       fullPath: '/chart-of-accounts'
       preLoaderRoute: typeof ChartOfAccountsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/balance-sheet': {
-      id: '/balance-sheet'
-      path: '/balance-sheet'
-      fullPath: '/balance-sheet'
-      preLoaderRoute: typeof BalanceSheetRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin': {
@@ -158,11 +105,18 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
-  BalanceSheetRoute: BalanceSheetRoute,
   ChartOfAccountsRoute: ChartOfAccountsRoute,
-  OpexReportsRoute: OpexReportsRoute,
   VesselsRoute: VesselsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
