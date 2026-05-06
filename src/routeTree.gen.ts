@@ -13,6 +13,7 @@ import { Route as VesselsRouteImport } from './routes/vessels'
 import { Route as OpexReportsRouteImport } from './routes/opex-reports'
 import { Route as ChartOfAccountsRouteImport } from './routes/chart-of-accounts'
 import { Route as BalanceSheetRouteImport } from './routes/balance-sheet'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 
 const VesselsRoute = VesselsRouteImport.update({
@@ -35,6 +36,11 @@ const BalanceSheetRoute = BalanceSheetRouteImport.update({
   path: '/balance-sheet',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -43,6 +49,7 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/balance-sheet': typeof BalanceSheetRoute
   '/chart-of-accounts': typeof ChartOfAccountsRoute
   '/opex-reports': typeof OpexReportsRoute
@@ -50,6 +57,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/balance-sheet': typeof BalanceSheetRoute
   '/chart-of-accounts': typeof ChartOfAccountsRoute
   '/opex-reports': typeof OpexReportsRoute
@@ -58,6 +66,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/balance-sheet': typeof BalanceSheetRoute
   '/chart-of-accounts': typeof ChartOfAccountsRoute
   '/opex-reports': typeof OpexReportsRoute
@@ -67,6 +76,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/admin'
     | '/balance-sheet'
     | '/chart-of-accounts'
     | '/opex-reports'
@@ -74,6 +84,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/admin'
     | '/balance-sheet'
     | '/chart-of-accounts'
     | '/opex-reports'
@@ -81,6 +92,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/admin'
     | '/balance-sheet'
     | '/chart-of-accounts'
     | '/opex-reports'
@@ -89,6 +101,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRoute
   BalanceSheetRoute: typeof BalanceSheetRoute
   ChartOfAccountsRoute: typeof ChartOfAccountsRoute
   OpexReportsRoute: typeof OpexReportsRoute
@@ -125,6 +138,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BalanceSheetRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -137,6 +157,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRoute,
   BalanceSheetRoute: BalanceSheetRoute,
   ChartOfAccountsRoute: ChartOfAccountsRoute,
   OpexReportsRoute: OpexReportsRoute,
