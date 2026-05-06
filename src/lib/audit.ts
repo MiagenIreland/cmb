@@ -9,8 +9,7 @@ export type AuditAction =
   | "Invite User"
   | "Edit User"
   | "Remove User"
-  | "Edit Group"
-  | "Role Switched";
+  | "Edit Group";
 
 export interface AuditEntry {
   id: string;
