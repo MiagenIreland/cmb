@@ -1,4 +1,5 @@
 import { useRole, ROLES, type Role } from "@/lib/roles";
+import { logAudit } from "@/lib/audit";
 import {
   Select,
   SelectContent,
@@ -8,11 +9,18 @@ import {
 } from "@/components/ui/select";
 
 export function RoleSwitcher() {
-  const { role, setRole } = useRole();
+  const { role, user, setRole } = useRole();
   return (
     <div className="flex items-center gap-2 rounded-lg border bg-card px-3 py-2">
       <span className="text-xs text-muted-foreground font-medium">Demo Role:</span>
-      <Select value={role} onValueChange={(v) => setRole(v as Role)}>
+      <Select
+        value={role}
+        onValueChange={(v) => {
+          const next = v as Role;
+          logAudit({ user: user.name, role, action: "Role Switched", target: next, details: `From ${role}` });
+          setRole(next);
+        }}
+      >
         <SelectTrigger className="h-8 w-[170px] text-sm">
           <SelectValue />
         </SelectTrigger>

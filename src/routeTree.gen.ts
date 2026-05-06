@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as VesselsRouteImport } from './routes/vessels'
 import { Route as ChartOfAccountsRouteImport } from './routes/chart-of-accounts'
+import { Route as AuditTrailRouteImport } from './routes/audit-trail'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 
@@ -22,6 +23,11 @@ const VesselsRoute = VesselsRouteImport.update({
 const ChartOfAccountsRoute = ChartOfAccountsRouteImport.update({
   id: '/chart-of-accounts',
   path: '/chart-of-accounts',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuditTrailRoute = AuditTrailRouteImport.update({
+  id: '/audit-trail',
+  path: '/audit-trail',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminRoute = AdminRouteImport.update({
@@ -38,12 +44,14 @@ const IndexRoute = IndexRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/audit-trail': typeof AuditTrailRoute
   '/chart-of-accounts': typeof ChartOfAccountsRoute
   '/vessels': typeof VesselsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/audit-trail': typeof AuditTrailRoute
   '/chart-of-accounts': typeof ChartOfAccountsRoute
   '/vessels': typeof VesselsRoute
 }
@@ -51,20 +59,28 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/audit-trail': typeof AuditTrailRoute
   '/chart-of-accounts': typeof ChartOfAccountsRoute
   '/vessels': typeof VesselsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/admin' | '/chart-of-accounts' | '/vessels'
+  fullPaths: '/' | '/admin' | '/audit-trail' | '/chart-of-accounts' | '/vessels'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/admin' | '/chart-of-accounts' | '/vessels'
-  id: '__root__' | '/' | '/admin' | '/chart-of-accounts' | '/vessels'
+  to: '/' | '/admin' | '/audit-trail' | '/chart-of-accounts' | '/vessels'
+  id:
+    | '__root__'
+    | '/'
+    | '/admin'
+    | '/audit-trail'
+    | '/chart-of-accounts'
+    | '/vessels'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
+  AuditTrailRoute: typeof AuditTrailRoute
   ChartOfAccountsRoute: typeof ChartOfAccountsRoute
   VesselsRoute: typeof VesselsRoute
 }
@@ -83,6 +99,13 @@ declare module '@tanstack/react-router' {
       path: '/chart-of-accounts'
       fullPath: '/chart-of-accounts'
       preLoaderRoute: typeof ChartOfAccountsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/audit-trail': {
+      id: '/audit-trail'
+      path: '/audit-trail'
+      fullPath: '/audit-trail'
+      preLoaderRoute: typeof AuditTrailRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin': {
@@ -105,6 +128,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
+  AuditTrailRoute: AuditTrailRoute,
   ChartOfAccountsRoute: ChartOfAccountsRoute,
   VesselsRoute: VesselsRoute,
 }

@@ -33,6 +33,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useRole } from "@/lib/roles";
+import { logAudit } from "@/lib/audit";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -90,7 +91,7 @@ interface FormState {
 const EMPTY_FORM: FormState = { smCode: "", smDescription: "", cmbCode: "", cmbDescription: "", comment: "" };
 
 function CoAPage() {
-  const { user, permissions } = useRole();
+  const { user, role, permissions } = useRole();
   const [rows, setRows] = useState<Mapping[]>(INITIAL);
   const [tab, setTab] = useState("mapping");
   const [dialogMode, setDialogMode] = useState<null | "add" | "remap">(null);
@@ -101,7 +102,17 @@ function CoAPage() {
   const canApprove = permissions.canApprove;
 
   const updateStatus = (id: string, status: Status) => {
+    const row = rows.find((r) => r.id === id);
     setRows((rs) => rs.map((r) => (r.id === id ? { ...r, status } : r)));
+    if (row) {
+      logAudit({
+        user: user.name,
+        role,
+        action: status === "Approved" ? "Approve Mapping" : "Reject Mapping",
+        target: `${row.smCode} → ${row.cmbCode}`,
+        details: row.shipManager,
+      });
+    }
   };
 
   const submitForm = () => {
@@ -121,6 +132,13 @@ function CoAPage() {
     };
     setRows((rs) => [newRow, ...rs]);
     toast.success(dialogMode === "add" ? "Account submitted for approval" : "Remap submitted for approval");
+    logAudit({
+      user: user.name,
+      role,
+      action: dialogMode === "add" ? "Add Account" : "Remap Account",
+      target: `${newRow.smCode} → ${newRow.cmbCode}`,
+      details: form.comment || undefined,
+    });
     setDialogMode(null);
     setForm(EMPTY_FORM);
   };
@@ -135,6 +153,13 @@ function CoAPage() {
       return r;
     }));
     toast.success(`Approved ${count} pending entr${count === 1 ? "y" : "ies"} for ${sm}`);
+    logAudit({
+      user: user.name,
+      role,
+      action: "Batch Approve",
+      target: sm,
+      details: `${count} mapping${count === 1 ? "" : "s"} approved`,
+    });
   };
 
   const renderRow = (r: Mapping, withActions: boolean) => (

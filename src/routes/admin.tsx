@@ -31,6 +31,7 @@ import { Badge } from "@/components/ui/badge";
 import { Pencil, Trash2, UserPlus, ShieldAlert } from "lucide-react";
 import { toast } from "sonner";
 import { useRole } from "@/lib/roles";
+import { logAudit } from "@/lib/audit";
 
 export const Route = createFileRoute("/admin")({
   component: AdminPage,
@@ -146,6 +147,7 @@ function AdminPage() {
 }
 
 function UsersTab() {
+  const { user: actor, role: actorRole } = useRole();
   const [users, setUsers] = useState<AdminUser[]>(INITIAL_USERS);
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<AdminUser | null>(null);
@@ -179,16 +181,20 @@ function UsersTab() {
     if (editing) {
       setUsers((prev) => prev.map((u) => (u.id === editing.id ? { ...u, ...cleaned } : u)));
       toast.success(`Updated ${cleaned.name}`);
+      logAudit({ user: actor.name, role: actorRole, action: "Edit User", target: cleaned.email, details: `${cleaned.role}${cleaned.scope ? ` · ${cleaned.scope}` : ""}` });
     } else {
       setUsers((prev) => [...prev, { id: crypto.randomUUID(), ...cleaned }]);
       toast.success(`Invited ${cleaned.name}`);
+      logAudit({ user: actor.name, role: actorRole, action: "Invite User", target: cleaned.email, details: `${cleaned.role}${cleaned.scope ? ` · ${cleaned.scope}` : ""}` });
     }
     setOpen(false);
   }
 
   function remove(id: string) {
-    setUsers((prev) => prev.filter((u) => u.id !== id));
+    const u = users.find((x) => x.id === id);
+    setUsers((prev) => prev.filter((x) => x.id !== id));
     toast.success("User removed");
+    if (u) logAudit({ user: actor.name, role: actorRole, action: "Remove User", target: u.email, details: u.role });
   }
 
   return (
@@ -293,6 +299,7 @@ function UsersTab() {
 }
 
 function GroupsTab() {
+  const { user: actor, role: actorRole } = useRole();
   const [groups, setGroups] = useState<Group[]>(INITIAL_GROUPS);
   const [editing, setEditing] = useState<Group | null>(null);
   const [selected, setSelected] = useState<string[]>([]);
@@ -310,6 +317,7 @@ function GroupsTab() {
     if (!editing) return;
     setGroups((prev) => prev.map((g) => (g.id === editing.id ? { ...g, vessels: selected } : g)));
     toast.success(`Updated ${editing.name}`);
+    logAudit({ user: actor.name, role: actorRole, action: "Edit Group", target: editing.name, details: `${selected.length} vessels` });
     setEditing(null);
   }
 
