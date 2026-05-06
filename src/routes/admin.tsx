@@ -39,16 +39,14 @@ export const Route = createFileRoute("/admin")({
 
 type AdminRole =
   | "Super Admin"
-  | "Ship Manager (Accounts)"
-  | "Ship Manager (Vessel Responsible)"
+  | "Ship Manager"
   | "Approver"
   | "Fleet Manager"
   | "Reporting Group Admin";
 
 const ROLE_OPTIONS: AdminRole[] = [
   "Super Admin",
-  "Ship Manager (Accounts)",
-  "Ship Manager (Vessel Responsible)",
+  "Ship Manager",
   "Approver",
   "Fleet Manager",
   "Reporting Group Admin",
