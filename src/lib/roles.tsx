@@ -2,15 +2,13 @@ import { createContext, useContext, useState, ReactNode, useMemo } from "react";
 
 export type Role =
   | "Super Admin"
-  | "Ship Manager (Vessel Accounts)"
-  | "Ship Manager (Vessel Responsible)"
+  | "Ship Manager"
   | "Approver"
   | "Reporting Group Admin";
 
 export const ROLES: Role[] = [
   "Super Admin",
-  "Ship Manager (Vessel Accounts)",
-  "Ship Manager (Vessel Responsible)",
+  "Ship Manager",
   "Approver",
   "Reporting Group Admin",
 ];
@@ -31,17 +29,11 @@ const USERS: Record<Role, RoleUser> = {
     company: "CMB",
     role: "Super Admin",
   },
-  "Ship Manager (Vessel Accounts)": {
+  "Ship Manager": {
     name: "Priya Nair",
     company: "Oceanic Ship Mgmt",
-    role: "Ship Manager (Vessel Accounts)",
+    role: "Ship Manager",
     shipManager: "Oceanic Ship Mgmt",
-  },
-  "Ship Manager (Vessel Responsible)": {
-    name: "Marcus Holt",
-    company: "Northern Marine",
-    role: "Ship Manager (Vessel Responsible)",
-    shipManager: "Northern Marine",
   },
   Approver: {
     name: "Hiroshi Tanaka",
