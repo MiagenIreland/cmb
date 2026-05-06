@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { MessageCircle, CheckCircle2 } from "lucide-react";
+import { MessageCircle, CheckCircle2, X, Send } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -58,9 +58,21 @@ const ROWS: Row[] = [
   { code: "5410", description: "Port Charges", amount: 14500, ytd: 71000, budget: 80000, prognosis: 78000, po: 1800 },
 ];
 
-const INITIAL_COMMENTS: Record<string, { author: string; text: string }> = {
-  "5210": { author: "Priya Nair", text: "R&M trending above budget — survey costs higher than planned this quarter." },
-  "5120": { author: "Hiroshi Tanaka", text: "Confirm Q2 stores requisition before finalising." },
+interface Comment {
+  id: number;
+  author: string;
+  text: string;
+  time: string;
+}
+
+const INITIAL_COMMENTS: Record<string, Comment[]> = {
+  "5210": [
+    { id: 1, author: "Priya Nair", text: "R&M trending above budget — survey costs higher than planned this quarter.", time: "2d ago" },
+    { id: 2, author: "Hiroshi Tanaka", text: "Agreed. Drydock invoice pending — should land next period.", time: "1d ago" },
+  ],
+  "5120": [
+    { id: 3, author: "Hiroshi Tanaka", text: "Confirm Q2 stores requisition before finalising.", time: "3d ago" },
+  ],
 };
 
 const fmt = (n: number) => n.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
@@ -69,8 +81,8 @@ function OpexReportsPage() {
   const { role } = useRole();
   const [vesselIdx, setVesselIdx] = useState(0);
   const [period, setPeriod] = useState("May 2026");
-  const [comments, setComments] = useState(INITIAL_COMMENTS);
-  const [activeRow, setActiveRow] = useState<Row | null>(null);
+  const [comments, setComments] = useState<Record<string, Comment[]>>(INITIAL_COMMENTS);
+  const [activeCode, setActiveCode] = useState<string | null>(null);
   const [draft, setDraft] = useState("");
   const [approveOpen, setApproveOpen] = useState(false);
   const [approveComment, setApproveComment] = useState("");
@@ -78,31 +90,17 @@ function OpexReportsPage() {
   const vessel = VESSELS[vesselIdx];
   const canApprove = role === "Approver" || role === "Super Admin";
 
-  const commentList = useMemo(() => {
-    return ROWS.filter((r) => comments[r.code]).map((r) => ({
-      code: r.code,
-      description: r.description,
-      ...comments[r.code],
-    }));
-  }, [comments]);
+  const activeRow = useMemo(() => ROWS.find((r) => r.code === activeCode) ?? null, [activeCode]);
+  const activeComments = activeCode ? comments[activeCode] ?? [] : [];
 
-  const openComment = (row: Row) => {
-    setActiveRow(row);
-    setDraft(comments[row.code]?.text ?? "");
-  };
-
-  const saveComment = () => {
-    if (!activeRow) return;
+  const addComment = () => {
+    if (!activeCode || !draft.trim()) return;
     setComments((c) => {
-      const next = { ...c };
-      if (draft.trim()) {
-        next[activeRow.code] = { author: "You", text: draft.trim() };
-      } else {
-        delete next[activeRow.code];
-      }
-      return next;
+      const list = c[activeCode] ?? [];
+      const nextId = Math.max(0, ...Object.values(c).flat().map((x) => x.id)) + 1;
+      return { ...c, [activeCode]: [...list, { id: nextId, author: "You", text: draft.trim(), time: "just now" }] };
     });
-    setActiveRow(null);
+    setDraft("");
   };
 
   const confirmApproval = () => {
@@ -157,101 +155,123 @@ function OpexReportsPage() {
         ))}
       </div>
 
-      <Card>
-        <CardHeader>
-          <div className="flex items-start justify-between flex-wrap gap-3">
-            <div>
-              <h2 className="text-xl font-semibold">{vessel.vessel}</h2>
-              <p className="text-sm text-muted-foreground mt-0.5">
-                {vessel.manager} · {period}
-              </p>
+      <div className={cn("grid gap-4 transition-all", activeCode ? "grid-cols-1 lg:grid-cols-[1fr_360px]" : "grid-cols-1")}>
+        <Card>
+          <CardHeader>
+            <div className="flex items-start justify-between flex-wrap gap-3">
+              <div>
+                <h2 className="text-xl font-semibold">{vessel.vessel}</h2>
+                <p className="text-sm text-muted-foreground mt-0.5">
+                  {vessel.manager} · {period}
+                </p>
+              </div>
+              <StagePill stage={vessel.stage} />
             </div>
-            <StagePill stage={vessel.stage} />
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {commentList.length > 0 && (
-            <div className="space-y-2">
-              {commentList.map((c) => (
-                <div
-                  key={c.code}
-                  className="border-l-4 border-primary bg-primary/5 rounded-r-md px-4 py-3"
-                >
-                  <div className="text-xs font-medium text-primary">
-                    {c.author} · {c.code} {c.description}
-                  </div>
-                  <div className="text-sm mt-1">{c.text}</div>
+          </CardHeader>
+          <CardContent>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Account Code</TableHead>
+                  <TableHead>Description</TableHead>
+                  <TableHead className="text-right">Amount</TableHead>
+                  <TableHead className="text-right">Year to Date</TableHead>
+                  <TableHead className="text-right">Budget</TableHead>
+                  <TableHead className="text-right">Prognosis</TableHead>
+                  <TableHead className="text-right">Purchase Orders</TableHead>
+                  <TableHead className="w-12"></TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {ROWS.map((r) => {
+                  const list = comments[r.code] ?? [];
+                  const has = list.length > 0;
+                  const isActive = activeCode === r.code;
+                  return (
+                    <TableRow
+                      key={r.code}
+                      onClick={() => setActiveCode(r.code)}
+                      className={cn("cursor-pointer", isActive && "bg-muted/60")}
+                    >
+                      <TableCell className="font-mono text-xs">{r.code}</TableCell>
+                      <TableCell className="font-medium">{r.description}</TableCell>
+                      <TableCell className="text-right tabular-nums">{fmt(r.amount)}</TableCell>
+                      <TableCell className="text-right tabular-nums text-muted-foreground">{fmt(r.ytd)}</TableCell>
+                      <TableCell className="text-right tabular-nums text-muted-foreground">{fmt(r.budget)}</TableCell>
+                      <TableCell className="text-right tabular-nums text-muted-foreground">{fmt(r.prognosis)}</TableCell>
+                      <TableCell className="text-right tabular-nums text-muted-foreground">{fmt(r.po)}</TableCell>
+                      <TableCell>
+                        <div
+                          className={cn(
+                            "inline-flex items-center gap-1 p-1.5 rounded-md",
+                            has ? "text-destructive" : "text-muted-foreground",
+                          )}
+                          aria-label={has ? `${list.length} comments` : "No comments"}
+                        >
+                          <MessageCircle className={cn("h-4 w-4", has && "fill-destructive/20")} />
+                          {has && <span className="text-xs font-medium">{list.length}</span>}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+
+        {activeRow && (
+          <Card className="h-fit lg:sticky lg:top-4">
+            <CardHeader className="pb-3">
+              <div className="flex items-start justify-between gap-2">
+                <div>
+                  <div className="text-xs font-mono text-muted-foreground">{activeRow.code}</div>
+                  <h3 className="text-base font-semibold">{activeRow.description}</h3>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    {activeComments.length} {activeComments.length === 1 ? "comment" : "comments"}
+                  </p>
                 </div>
-              ))}
-            </div>
-          )}
-
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Account Code</TableHead>
-                <TableHead>Description</TableHead>
-                <TableHead className="text-right">Amount</TableHead>
-                <TableHead className="text-right">Year to Date</TableHead>
-                <TableHead className="text-right">Budget</TableHead>
-                <TableHead className="text-right">Prognosis</TableHead>
-                <TableHead className="text-right">Purchase Orders</TableHead>
-                <TableHead className="w-12"></TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {ROWS.map((r) => {
-                const has = !!comments[r.code];
-                return (
-                  <TableRow key={r.code}>
-                    <TableCell className="font-mono text-xs">{r.code}</TableCell>
-                    <TableCell className="font-medium">{r.description}</TableCell>
-                    <TableCell className="text-right tabular-nums">{fmt(r.amount)}</TableCell>
-                    <TableCell className="text-right tabular-nums text-muted-foreground">{fmt(r.ytd)}</TableCell>
-                    <TableCell className="text-right tabular-nums text-muted-foreground">{fmt(r.budget)}</TableCell>
-                    <TableCell className="text-right tabular-nums text-muted-foreground">{fmt(r.prognosis)}</TableCell>
-                    <TableCell className="text-right tabular-nums text-muted-foreground">{fmt(r.po)}</TableCell>
-                    <TableCell>
-                      <button
-                        onClick={() => openComment(r)}
-                        className={cn(
-                          "p-1.5 rounded-md hover:bg-muted transition-colors",
-                          has ? "text-destructive" : "text-muted-foreground",
-                        )}
-                        aria-label={has ? "Edit comment" : "Add comment"}
-                      >
-                        <MessageCircle className={cn("h-4 w-4", has && "fill-destructive/20")} />
-                      </button>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
-
-      {/* Comment editor */}
-      <Dialog open={!!activeRow} onOpenChange={(o) => !o && setActiveRow(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>
-              Comment · {activeRow?.code} {activeRow?.description}
-            </DialogTitle>
-            <DialogDescription>Add or edit an inline comment for this account line.</DialogDescription>
-          </DialogHeader>
-          <Textarea
-            value={draft}
-            onChange={(e) => setDraft(e.target.value)}
-            placeholder="Write your comment…"
-            rows={4}
-          />
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setActiveRow(null)}>Cancel</Button>
-            <Button onClick={saveComment}>Save</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+                <button
+                  onClick={() => setActiveCode(null)}
+                  className="p-1 rounded-md hover:bg-muted text-muted-foreground"
+                  aria-label="Close"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="space-y-2 max-h-[400px] overflow-y-auto pr-1">
+                {activeComments.length === 0 && (
+                  <p className="text-sm text-muted-foreground italic">No comments yet. Be the first to add one.</p>
+                )}
+                {activeComments.map((c) => (
+                  <div key={c.id} className="border-l-4 border-primary bg-primary/5 rounded-r-md px-3 py-2">
+                    <div className="flex items-baseline justify-between gap-2">
+                      <div className="text-xs font-medium text-primary">{c.author}</div>
+                      <div className="text-[10px] text-muted-foreground">{c.time}</div>
+                    </div>
+                    <div className="text-sm mt-1 whitespace-pre-wrap">{c.text}</div>
+                  </div>
+                ))}
+              </div>
+              <div className="space-y-2 pt-2 border-t">
+                <Textarea
+                  value={draft}
+                  onChange={(e) => setDraft(e.target.value)}
+                  placeholder="Add a comment…"
+                  rows={3}
+                />
+                <div className="flex justify-end">
+                  <Button size="sm" onClick={addComment} disabled={!draft.trim()}>
+                    <Send className="h-3.5 w-3.5 mr-1" /> Post
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+      </div>
 
       {/* Approve modal */}
       <Dialog open={approveOpen} onOpenChange={setApproveOpen}>
