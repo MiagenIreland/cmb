@@ -79,7 +79,7 @@ const EMPTY_FORM: FormState = { smCode: "", smDescription: "", cmbCode: "", cmbD
 
 function CoAPage() {
   const { user, role, permissions } = useRole();
-  const [rows, setRows] = useState<Mapping[]>(INITIAL);
+  const rows = useMappings();
   const [tab, setTab] = useState("mapping");
   const [dialogMode, setDialogMode] = useState<null | "add" | "remap">(null);
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
@@ -90,15 +90,17 @@ function CoAPage() {
 
   const updateStatus = (id: string, status: Status) => {
     const row = rows.find((r) => r.id === id);
-    setRows((rs) => rs.map((r) => (r.id === id ? { ...r, status } : r)));
-    if (row) {
+    const updated = updateMappingStatus(id, status, user.name);
+    if (row && updated) {
       logAudit({
         user: user.name,
         role,
         action: status === "Approved" ? "Approve Mapping" : "Reject Mapping",
         target: `${row.smCode} → ${row.cmbCode}`,
-        details: row.shipManager,
+        details: `${row.shipManager} · ${status === "Approved" ? "Mapping approved" : "Mapping rejected"}`,
+        relatedId: row.id,
       });
+      toast.success(`Mapping ${status.toLowerCase()}`);
     }
   };
 
@@ -107,38 +109,34 @@ function CoAPage() {
       toast.error("SM CoA code and CMB CoA code are required");
       return;
     }
-    const newRow: Mapping = {
-      id: crypto.randomUUID(),
+    const newRow = addMapping({
       smCode: form.smCode,
       smDescription: form.smDescription,
       cmbCode: form.cmbCode,
       cmbDescription: form.cmbDescription,
-      status: "Pending",
       shipManager: user.company,
       comment: form.comment || undefined,
-    };
-    setRows((rs) => [newRow, ...rs]);
-    toast.success(dialogMode === "add" ? "Account submitted for approval" : "Remap submitted for approval");
+      submittedBy: user.name,
+      submittedAt: new Date().toISOString(),
+      status: "Pending",
+    });
+    toast.success(dialogMode === "add" ? "Account sent for approval" : "Remap sent for approval");
     logAudit({
       user: user.name,
       role,
       action: dialogMode === "add" ? "Add Account" : "Remap Account",
       target: `${newRow.smCode} → ${newRow.cmbCode}`,
-      details: form.comment || undefined,
+      details: `Sent for approval${form.comment ? ` · ${form.comment}` : ""}`,
+      relatedId: newRow.id,
     });
     setDialogMode(null);
     setForm(EMPTY_FORM);
+    setTab("pending");
   };
 
   const batchApprove = (sm: string) => {
-    let count = 0;
-    setRows((rs) => rs.map((r) => {
-      if (r.shipManager === sm && r.status === "Pending") {
-        count++;
-        return { ...r, status: "Approved" };
-      }
-      return r;
-    }));
+    const approved = batchApproveByManager(sm, user.name);
+    const count = approved.length;
     toast.success(`Approved ${count} pending entr${count === 1 ? "y" : "ies"} for ${sm}`);
     logAudit({
       user: user.name,
