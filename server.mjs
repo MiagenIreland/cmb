@@ -1,5 +1,5 @@
 import { createServer } from 'node:http';
-import { createReadStream, existsSync } from 'node:fs';
+import { createReadStream, existsSync, statSync } from 'node:fs';
 import { join, extname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -34,6 +34,15 @@ const MIME_TYPES = {
   '.webp': 'image/webp',
 };
 
+function serveStatic(filePath, res) {
+  const ext = extname(filePath).toLowerCase();
+  const contentType = MIME_TYPES[ext] || 'application/octet-stream';
+  res.statusCode = 200;
+  res.setHeader('Content-Type', contentType);
+  res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+  createReadStream(filePath).pipe(res);
+}
+
 function createAssetsBinding(staticDir) {
   return {
     async fetch(request) {
@@ -41,25 +50,27 @@ function createAssetsBinding(staticDir) {
       const pathname = decodeURIComponent(url.pathname);
       const filePath = join(staticDir, pathname);
 
-      if (existsSync(filePath)) {
-        const ext = extname(filePath).toLowerCase();
-        const contentType = MIME_TYPES[ext] || 'application/octet-stream';
-        return new Promise((resolve) => {
-          const chunks = [];
-          const stream = createReadStream(filePath);
-          stream.on('data', (chunk) => chunks.push(chunk));
-          stream.on('end', () => {
-            resolve(new Response(Buffer.concat(chunks), {
-              status: 200,
-              headers: {
-                'Content-Type': contentType,
-                'Cache-Control': 'public, max-age=31536000, immutable',
-              },
-            }));
+      try {
+        if (existsSync(filePath) && statSync(filePath).isFile()) {
+          const ext = extname(filePath).toLowerCase();
+          const contentType = MIME_TYPES[ext] || 'application/octet-stream';
+          return new Promise((resolve) => {
+            const chunks = [];
+            const stream = createReadStream(filePath);
+            stream.on('data', (chunk) => chunks.push(chunk));
+            stream.on('end', () => {
+              resolve(new Response(Buffer.concat(chunks), {
+                status: 200,
+                headers: {
+                  'Content-Type': contentType,
+                  'Cache-Control': 'public, max-age=31536000, immutable',
+                },
+              }));
+            });
+            stream.on('error', () => resolve(new Response('Not Found', { status: 404 })));
           });
-          stream.on('error', () => resolve(new Response('Not Found', { status: 404 })));
-        });
-      }
+        }
+      } catch {}
 
       return new Response('Not Found', { status: 404 });
     },
@@ -68,6 +79,17 @@ function createAssetsBinding(staticDir) {
 
 const server = createServer(async (req, res) => {
   try {
+    // Serve static assets directly — don't go through the worker for these
+    const pathname = decodeURIComponent(req.url.split('?')[0]);
+    const staticPath = join(STATIC_DIR, pathname);
+    try {
+      if (existsSync(staticPath) && statSync(staticPath).isFile()) {
+        serveStatic(staticPath, res);
+        return;
+      }
+    } catch {}
+
+    // Everything else goes through the SSR worker
     const w = await getWorker();
     const host = req.headers.host || `localhost:${PORT}`;
     const url = `http://${host}${req.url}`;

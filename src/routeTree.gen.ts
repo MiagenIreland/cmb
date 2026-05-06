@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as VesselsRouteImport } from './routes/vessels'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as ChartOfAccountsRouteImport } from './routes/chart-of-accounts'
 import { Route as AuditTrailRouteImport } from './routes/audit-trail'
 import { Route as AdminRouteImport } from './routes/admin'
@@ -18,6 +19,11 @@ import { Route as IndexRouteImport } from './routes/index'
 const VesselsRoute = VesselsRouteImport.update({
   id: '/vessels',
   path: '/vessels',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ChartOfAccountsRoute = ChartOfAccountsRouteImport.update({
@@ -46,6 +52,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRoute
   '/audit-trail': typeof AuditTrailRoute
   '/chart-of-accounts': typeof ChartOfAccountsRoute
+  '/login': typeof LoginRoute
   '/vessels': typeof VesselsRoute
 }
 export interface FileRoutesByTo {
@@ -53,6 +60,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminRoute
   '/audit-trail': typeof AuditTrailRoute
   '/chart-of-accounts': typeof ChartOfAccountsRoute
+  '/login': typeof LoginRoute
   '/vessels': typeof VesselsRoute
 }
 export interface FileRoutesById {
@@ -61,19 +69,33 @@ export interface FileRoutesById {
   '/admin': typeof AdminRoute
   '/audit-trail': typeof AuditTrailRoute
   '/chart-of-accounts': typeof ChartOfAccountsRoute
+  '/login': typeof LoginRoute
   '/vessels': typeof VesselsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/admin' | '/audit-trail' | '/chart-of-accounts' | '/vessels'
+  fullPaths:
+    | '/'
+    | '/admin'
+    | '/audit-trail'
+    | '/chart-of-accounts'
+    | '/login'
+    | '/vessels'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/admin' | '/audit-trail' | '/chart-of-accounts' | '/vessels'
+  to:
+    | '/'
+    | '/admin'
+    | '/audit-trail'
+    | '/chart-of-accounts'
+    | '/login'
+    | '/vessels'
   id:
     | '__root__'
     | '/'
     | '/admin'
     | '/audit-trail'
     | '/chart-of-accounts'
+    | '/login'
     | '/vessels'
   fileRoutesById: FileRoutesById
 }
@@ -82,6 +104,7 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRoute
   AuditTrailRoute: typeof AuditTrailRoute
   ChartOfAccountsRoute: typeof ChartOfAccountsRoute
+  LoginRoute: typeof LoginRoute
   VesselsRoute: typeof VesselsRoute
 }
 
@@ -92,6 +115,13 @@ declare module '@tanstack/react-router' {
       path: '/vessels'
       fullPath: '/vessels'
       preLoaderRoute: typeof VesselsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/chart-of-accounts': {
@@ -130,8 +160,18 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRoute,
   AuditTrailRoute: AuditTrailRoute,
   ChartOfAccountsRoute: ChartOfAccountsRoute,
+  LoginRoute: LoginRoute,
   VesselsRoute: VesselsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}

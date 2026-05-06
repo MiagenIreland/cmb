@@ -2,8 +2,9 @@ import { Outlet, createRootRoute, HeadContent, Scripts } from "@tanstack/react-r
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { TopBar } from "@/components/TopBar";
-import { RoleProvider } from "@/lib/roles";
+import { RoleProvider, useRole } from "@/lib/roles";
 import { Toaster } from "@/components/ui/sonner";
+import { LoginPage } from "@/routes/login";
 
 import appCss from "../styles.css?url";
 
@@ -23,15 +24,12 @@ export const Route = createRootRoute({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Ship" },
+      { title: "CMB Portal" },
       { name: "description", content: "Ship management portal for chart of accounts and vessel oversight." },
-      { property: "og:title", content: "Ship" },
-      { name: "twitter:title", content: "Ship" },
+      { property: "og:title", content: "CMB Portal" },
+      { name: "twitter:title", content: "CMB Portal" },
       { property: "og:description", content: "Ship management portal for chart of accounts and vessel oversight." },
       { name: "twitter:description", content: "Ship management portal for chart of accounts and vessel oversight." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/236934c1-714e-46b9-858d-d4de52c81866/id-preview-3ad942d0--d0c00a98-252e-49f0-ad81-b97cacfcc223.lovable.app-1778072198590.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/236934c1-714e-46b9-858d-d4de52c81866/id-preview-3ad942d0--d0c00a98-252e-49f0-ad81-b97cacfcc223.lovable.app-1778072198590.png" },
-      { name: "twitter:card", content: "summary_large_image" },
       { property: "og:type", content: "website" },
     ],
     links: [{ rel: "stylesheet", href: appCss }],
@@ -58,18 +56,35 @@ function RootShell({ children }: { children: React.ReactNode }) {
 function RootComponent() {
   return (
     <RoleProvider>
-      <SidebarProvider>
-        <div className="min-h-screen flex w-full bg-muted/30">
-          <AppSidebar />
-          <div className="flex-1 flex flex-col min-w-0">
-            <TopBar />
-            <main className="flex-1 p-6">
-              <Outlet />
-            </main>
-          </div>
-        </div>
-        <Toaster />
-      </SidebarProvider>
+      <AppLayout />
     </RoleProvider>
+  );
+}
+
+function AppLayout() {
+  const { isAuthenticated } = useRole();
+
+  if (!isAuthenticated) {
+    return (
+      <>
+        <LoginPage />
+        <Toaster />
+      </>
+    );
+  }
+
+  return (
+    <SidebarProvider>
+      <div className="min-h-screen flex w-full bg-muted/30">
+        <AppSidebar />
+        <div className="flex-1 flex flex-col min-w-0">
+          <TopBar />
+          <main className="flex-1 p-6">
+            <Outlet />
+          </main>
+        </div>
+      </div>
+      <Toaster />
+    </SidebarProvider>
   );
 }

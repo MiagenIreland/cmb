@@ -17,35 +17,15 @@ export interface RoleUser {
   name: string;
   company: string;
   role: Role;
-  /** Ship manager company name this user is tied to (for SM roles). */
   shipManager?: string;
-  /** Reporting group this user is tied to (for Reporting Group Admin). */
   reportingGroup?: string;
 }
 
 const USERS: Record<Role, RoleUser> = {
-  "Super Admin": {
-    name: "Alex Morgan",
-    company: "CMB",
-    role: "Super Admin",
-  },
-  "Ship Manager": {
-    name: "Priya Nair",
-    company: "Oceanic Ship Mgmt",
-    role: "Ship Manager",
-    shipManager: "Oceanic Ship Mgmt",
-  },
-  Approver: {
-    name: "Hiroshi Tanaka",
-    company: "CMB",
-    role: "Approver",
-  },
-  "Reporting Group Admin": {
-    name: "Elena Vasquez",
-    company: "CMB",
-    role: "Reporting Group Admin",
-    reportingGroup: "Tanker Group A",
-  },
+  "Super Admin": { name: "Alex Morgan", company: "CMB", role: "Super Admin" },
+  "Ship Manager": { name: "Priya Nair", company: "Oceanic Ship Mgmt", role: "Ship Manager", shipManager: "Oceanic Ship Mgmt" },
+  Approver: { name: "Hiroshi Tanaka", company: "CMB", role: "Approver" },
+  "Reporting Group Admin": { name: "Elena Vasquez", company: "CMB", role: "Reporting Group Admin", reportingGroup: "Tanker Group A" },
 };
 
 interface Permissions {
@@ -55,23 +35,54 @@ interface Permissions {
   isSuperAdmin: boolean;
 }
 
+export type NotificationKind = "vessel" | "approval" | "system";
+
 interface Ctx {
   role: Role;
   user: RoleUser;
   setRole: (r: Role) => void;
   permissions: Permissions;
-  /** Filter a list of vessel-like records by role visibility. */
+  isAuthenticated: boolean;
+  login: (role: Role) => void;
+  logout: () => void;
   filterVessels: <T extends { manager?: string; shipManager?: string; reportingGroup?: string }>(items: T[]) => T[];
-  /** Filter notifications by role. */
   filterNotifications: <T extends { kind: NotificationKind; shipManager?: string }>(items: T[]) => T[];
 }
 
-export type NotificationKind = "vessel" | "approval" | "system";
-
 const RoleCtx = createContext<Ctx | null>(null);
 
+function getInitialRole(): Role {
+  if (typeof window === "undefined") return "Super Admin";
+  return (localStorage.getItem("cmb_role") as Role) ?? "Super Admin";
+}
+
+function getInitialAuth(): boolean {
+  if (typeof window === "undefined") return false;
+  return localStorage.getItem("cmb_auth") === "true";
+}
+
 export function RoleProvider({ children }: { children: ReactNode }) {
-  const [role, setRole] = useState<Role>("Super Admin");
+  const [role, setRoleState] = useState<Role>(getInitialRole);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(getInitialAuth);
+
+  const setRole = (r: Role) => {
+    setRoleState(r);
+    if (typeof window !== "undefined") localStorage.setItem("cmb_role", r);
+  };
+
+  const login = (r: Role) => {
+    setRoleState(r);
+    setIsAuthenticated(true);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("cmb_role", r);
+      localStorage.setItem("cmb_auth", "true");
+    }
+  };
+
+  const logout = () => {
+    setIsAuthenticated(false);
+    if (typeof window !== "undefined") localStorage.removeItem("cmb_auth");
+  };
 
   const value = useMemo<Ctx>(() => {
     const user = USERS[role];
@@ -82,40 +93,26 @@ export function RoleProvider({ children }: { children: ReactNode }) {
 
     const filterVessels: Ctx["filterVessels"] = (items) => {
       if (isSuperAdmin) return items;
-      if (isShipManager) {
-        return items.filter((v) => {
-          const sm = v.shipManager ?? v.manager;
-          return sm === user.shipManager;
-        });
-      }
-      if (role === "Reporting Group Admin") {
-        return items.filter((v) => v.reportingGroup === user.reportingGroup);
-      }
-      // Approver sees all vessels they may need to approve.
+      if (isShipManager) return items.filter((v) => (v.shipManager ?? v.manager) === user.shipManager);
+      if (role === "Reporting Group Admin") return items.filter((v) => v.reportingGroup === user.reportingGroup);
       return items;
     };
 
     const filterNotifications: Ctx["filterNotifications"] = (items) => {
       if (isSuperAdmin) return items;
-      if (isShipManager) {
-        return items.filter(
-          (n) => n.kind === "vessel" && (!n.shipManager || n.shipManager === user.shipManager),
-        );
-      }
+      if (isShipManager) return items.filter((n) => n.kind === "vessel" && (!n.shipManager || n.shipManager === user.shipManager));
       if (role === "Approver") return items.filter((n) => n.kind === "approval");
-      // Reporting group admin: system + approvals.
       return items.filter((n) => n.kind === "system" || n.kind === "approval");
     };
 
     return {
-      role,
-      user,
-      setRole,
+      role, user, setRole, login, logout,
       permissions: { canApprove, canEditCoA, isShipManager, isSuperAdmin },
+      isAuthenticated,
       filterVessels,
       filterNotifications,
     };
-  }, [role]);
+  }, [role, isAuthenticated]);
 
   return <RoleCtx.Provider value={value}>{children}</RoleCtx.Provider>;
 }
@@ -127,10 +124,5 @@ export function useRole() {
 }
 
 export function initials(name: string) {
-  return name
-    .split(" ")
-    .map((n) => n[0])
-    .slice(0, 2)
-    .join("")
-    .toUpperCase();
+  return name.split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase();
 }
