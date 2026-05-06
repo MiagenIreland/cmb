@@ -11,7 +11,7 @@ import {
   SidebarMenuItem,
   SidebarFooter,
 } from "@/components/ui/sidebar";
-import { useRole, initials } from "@/lib/roles";
+import { useRole, initials, type Role } from "@/lib/roles";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 const items = [
@@ -22,9 +22,19 @@ const items = [
   { title: "Vessel Listing", url: "/vessels", icon: Ship },
 ];
 
+const NAV_BY_ROLE: Record<Role, string[]> = {
+  "Super Admin": ["Home", "Opex Reports", "Balance Sheet Reports", "Chart of Accounts", "Vessel Listing"],
+  "Ship Manager (Vessel Accounts)": ["Home", "Opex Reports", "Chart of Accounts"],
+  "Ship Manager (Vessel Responsible)": ["Home", "Opex Reports", "Chart of Accounts"],
+  Approver: ["Home", "Opex Reports", "Balance Sheet Reports", "Chart of Accounts"],
+  "Reporting Group Admin": ["Home", "Opex Reports", "Balance Sheet Reports"],
+};
+
 export function AppSidebar() {
   const path = useRouterState({ select: (r) => r.location.pathname });
-  const { user } = useRole();
+  const { user, role } = useRole();
+  const allowed = NAV_BY_ROLE[role];
+  const visibleItems = items.filter((i) => allowed.includes(i.title));
 
   return (
     <Sidebar collapsible="icon">
@@ -41,7 +51,7 @@ export function AppSidebar() {
           <SidebarGroupLabel>Navigation</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {items.map((item) => (
+              {visibleItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild isActive={path === item.url}>
                     <Link to={item.url} className="flex items-center gap-2">
