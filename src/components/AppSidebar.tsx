@@ -16,19 +16,17 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 const items = [
   { title: "Home", url: "/", icon: Home },
-  { title: "Opex Reports", url: "/opex-reports", icon: FileBarChart },
-  { title: "Balance Sheet Reports", url: "/balance-sheet", icon: Scale },
   { title: "Chart of Accounts", url: "/chart-of-accounts", icon: BookOpen },
   { title: "Vessel Listing", url: "/vessels", icon: Ship },
   { title: "Admin", url: "/admin", icon: Shield },
 ];
 
 const NAV_BY_ROLE: Record<Role, string[]> = {
-  "Super Admin": ["Home", "Opex Reports", "Balance Sheet Reports", "Chart of Accounts", "Vessel Listing", "Admin"],
-  "Ship Manager (Vessel Accounts)": ["Home", "Opex Reports", "Chart of Accounts"],
-  "Ship Manager (Vessel Responsible)": ["Home", "Opex Reports", "Chart of Accounts"],
-  Approver: ["Home", "Opex Reports", "Balance Sheet Reports", "Chart of Accounts"],
-  "Reporting Group Admin": ["Home", "Opex Reports", "Balance Sheet Reports"],
+  "Super Admin": ["Home", "Chart of Accounts", "Vessel Listing", "Admin"],
+  "Ship Manager (Vessel Accounts)": ["Home", "Chart of Accounts"],
+  "Ship Manager (Vessel Responsible)": ["Home", "Chart of Accounts"],
+  Approver: ["Home", "Chart of Accounts"],
+  "Reporting Group Admin": ["Home"],
 };
 
 export function AppSidebar() {
