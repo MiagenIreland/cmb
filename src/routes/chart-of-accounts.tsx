@@ -37,7 +37,7 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/chart-of-accounts")({
-  head: () => ({ meta: [{ title: "Chart of Accounts — Frontline Portal" }] }),
+  head: () => ({ meta: [{ title: "Chart of Accounts — CMB Portal" }] }),
   component: CoAPage,
 });
 
@@ -47,8 +47,8 @@ interface Mapping {
   id: string;
   smCode: string;
   smDescription: string;
-  frontlineCode: string;
-  frontlineDescription: string;
+  cmbCode: string;
+  cmbDescription: string;
   status: Status;
   shipManager: string;
   comment?: string;
@@ -57,13 +57,13 @@ interface Mapping {
 const SHIP_MANAGERS = ["Oceanic Ship Mgmt", "Northern Marine", "Desert Shipping", "Tropic Marine"];
 
 const INITIAL: Mapping[] = [
-  { id: "1", smCode: "OSM-5010", smDescription: "Wages — Officers", frontlineCode: "5010", frontlineDescription: "Crew Wages", status: "Approved", shipManager: "Oceanic Ship Mgmt" },
-  { id: "2", smCode: "OSM-5020", smDescription: "Crew Travel Exp.", frontlineCode: "5020", frontlineDescription: "Crew Travel", status: "Approved", shipManager: "Oceanic Ship Mgmt" },
-  { id: "3", smCode: "NM-5110", smDescription: "Lub Oil Consumption", frontlineCode: "5110", frontlineDescription: "Lubricating Oil", status: "Pending", shipManager: "Northern Marine" },
-  { id: "4", smCode: "NM-5120-D", smDescription: "Deck Stores Issued", frontlineCode: "5120", frontlineDescription: "Stores — Deck", status: "Pending", shipManager: "Northern Marine" },
-  { id: "5", smCode: "DS-5210", smDescription: "Maint. & Survey", frontlineCode: "5210", frontlineDescription: "Repairs & Maintenance", status: "Pending", shipManager: "Desert Shipping" },
-  { id: "6", smCode: "TM-5410", smDescription: "Port Disbursements", frontlineCode: "5410", frontlineDescription: "Port Charges", status: "Rejected", shipManager: "Tropic Marine" },
-  { id: "7", smCode: "OSM-5310", smDescription: "Hull Insurance", frontlineCode: "5310", frontlineDescription: "Insurance — H&M", status: "Approved", shipManager: "Oceanic Ship Mgmt" },
+  { id: "1", smCode: "OSM-5010", smDescription: "Wages — Officers", cmbCode: "5010", cmbDescription: "Crew Wages", status: "Approved", shipManager: "Oceanic Ship Mgmt" },
+  { id: "2", smCode: "OSM-5020", smDescription: "Crew Travel Exp.", cmbCode: "5020", cmbDescription: "Crew Travel", status: "Approved", shipManager: "Oceanic Ship Mgmt" },
+  { id: "3", smCode: "NM-5110", smDescription: "Lub Oil Consumption", cmbCode: "5110", cmbDescription: "Lubricating Oil", status: "Pending", shipManager: "Northern Marine" },
+  { id: "4", smCode: "NM-5120-D", smDescription: "Deck Stores Issued", cmbCode: "5120", cmbDescription: "Stores — Deck", status: "Pending", shipManager: "Northern Marine" },
+  { id: "5", smCode: "DS-5210", smDescription: "Maint. & Survey", cmbCode: "5210", cmbDescription: "Repairs & Maintenance", status: "Pending", shipManager: "Desert Shipping" },
+  { id: "6", smCode: "TM-5410", smDescription: "Port Disbursements", cmbCode: "5410", cmbDescription: "Port Charges", status: "Rejected", shipManager: "Tropic Marine" },
+  { id: "7", smCode: "OSM-5310", smDescription: "Hull Insurance", cmbCode: "5310", cmbDescription: "Insurance — H&M", status: "Approved", shipManager: "Oceanic Ship Mgmt" },
 ];
 
 const STATUS_CLASS: Record<Status, string> = {
@@ -83,11 +83,11 @@ function StatusPill({ status }: { status: Status }) {
 interface FormState {
   smCode: string;
   smDescription: string;
-  frontlineCode: string;
-  frontlineDescription: string;
+  cmbCode: string;
+  cmbDescription: string;
   comment: string;
 }
-const EMPTY_FORM: FormState = { smCode: "", smDescription: "", frontlineCode: "", frontlineDescription: "", comment: "" };
+const EMPTY_FORM: FormState = { smCode: "", smDescription: "", cmbCode: "", cmbDescription: "", comment: "" };
 
 function CoAPage() {
   const { user, permissions } = useRole();
@@ -105,16 +105,16 @@ function CoAPage() {
   };
 
   const submitForm = () => {
-    if (!form.smCode || !form.frontlineCode) {
-      toast.error("SM CoA code and Frontline CoA code are required");
+    if (!form.smCode || !form.cmbCode) {
+      toast.error("SM CoA code and CMB CoA code are required");
       return;
     }
     const newRow: Mapping = {
       id: crypto.randomUUID(),
       smCode: form.smCode,
       smDescription: form.smDescription,
-      frontlineCode: form.frontlineCode,
-      frontlineDescription: form.frontlineDescription,
+      cmbCode: form.cmbCode,
+      cmbDescription: form.cmbDescription,
       status: "Pending",
       shipManager: user.company,
       comment: form.comment || undefined,
@@ -141,8 +141,8 @@ function CoAPage() {
     <TableRow key={r.id} className={r.status === "Pending" ? "bg-amber-50/50 dark:bg-amber-950/10" : undefined}>
       <TableCell className="font-mono text-xs">{r.smCode}</TableCell>
       <TableCell>{r.smDescription}</TableCell>
-      <TableCell className="font-mono text-xs">{r.frontlineCode}</TableCell>
-      <TableCell>{r.frontlineDescription}</TableCell>
+      <TableCell className="font-mono text-xs">{r.cmbCode}</TableCell>
+      <TableCell>{r.cmbDescription}</TableCell>
       <TableCell><StatusPill status={r.status} /></TableCell>
       {withActions && (
         <TableCell className="text-right">
@@ -168,7 +168,7 @@ function CoAPage() {
       <div className="flex items-start justify-between flex-wrap gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Chart of Accounts</h1>
-          <p className="text-sm text-muted-foreground">Map ship-manager account codes to Frontline CoA.</p>
+          <p className="text-sm text-muted-foreground">Map ship-manager account codes to CMB CoA.</p>
         </div>
         <div className="flex items-center gap-2">
           {isShipManager && (
@@ -228,8 +228,8 @@ function CoAPage() {
                   <TableRow>
                     <TableHead>SM CoA Code</TableHead>
                     <TableHead>SM Description</TableHead>
-                    <TableHead>Frontline CoA Code</TableHead>
-                    <TableHead>Frontline Description</TableHead>
+                    <TableHead>CMB CoA Code</TableHead>
+                    <TableHead>CMB Description</TableHead>
                     <TableHead>Status</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -247,8 +247,8 @@ function CoAPage() {
                   <TableRow>
                     <TableHead>SM CoA Code</TableHead>
                     <TableHead>SM Description</TableHead>
-                    <TableHead>Frontline CoA Code</TableHead>
-                    <TableHead>Frontline Description</TableHead>
+                    <TableHead>CMB CoA Code</TableHead>
+                    <TableHead>CMB Description</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead className="text-right">Action</TableHead>
                   </TableRow>
@@ -275,7 +275,7 @@ function CoAPage() {
           <DialogHeader>
             <DialogTitle>{dialogMode === "add" ? "Add Account" : "Remap Account"}</DialogTitle>
             <DialogDescription>
-              Submit a new mapping between your CoA and the Frontline CoA. It will be marked Pending until approved.
+              Submit a new mapping between your CoA and the CMB CoA. It will be marked Pending until approved.
             </DialogDescription>
           </DialogHeader>
           <div className="grid grid-cols-2 gap-3">
@@ -288,12 +288,12 @@ function CoAPage() {
               <Input id="smd" value={form.smDescription} onChange={(e) => setForm({ ...form, smDescription: e.target.value })} />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="flc">Frontline CoA Code</Label>
-              <Input id="flc" value={form.frontlineCode} onChange={(e) => setForm({ ...form, frontlineCode: e.target.value })} />
+              <Label htmlFor="flc">CMB CoA Code</Label>
+              <Input id="flc" value={form.cmbCode} onChange={(e) => setForm({ ...form, cmbCode: e.target.value })} />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="fld">Frontline Description</Label>
-              <Input id="fld" value={form.frontlineDescription} onChange={(e) => setForm({ ...form, frontlineDescription: e.target.value })} />
+              <Label htmlFor="fld">CMB Description</Label>
+              <Input id="fld" value={form.cmbDescription} onChange={(e) => setForm({ ...form, cmbDescription: e.target.value })} />
             </div>
             <div className="space-y-1.5 col-span-2">
               <Label htmlFor="cmt">Comment (optional)</Label>

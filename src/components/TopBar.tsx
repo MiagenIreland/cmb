@@ -17,7 +17,7 @@ export function TopBar() {
     <header className="h-14 border-b bg-background flex items-center justify-between px-4 sticky top-0 z-10">
       <div className="flex items-center gap-3">
         <SidebarTrigger />
-        <h1 className="text-sm font-semibold tracking-tight">Frontline Portal</h1>
+        <h1 className="text-sm font-semibold tracking-tight">CMB Portal</h1>
       </div>
       <div className="flex items-center gap-3">
         <Badge variant="secondary" className="font-medium">

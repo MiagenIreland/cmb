@@ -79,20 +79,20 @@ const ALL_VESSELS = [
   "MV Coral Reef",
 ];
 
-const REPORTING_GROUPS = ["Frontline", "Golden Ocean", "Avance"];
+const REPORTING_GROUPS = ["CMB", "Golden Ocean", "Avance"];
 
 const INITIAL_USERS: AdminUser[] = [
-  { id: "u1", name: "Katrine", email: "katrine@frontline.com", company: "Frontline", role: "Super Admin" },
-  { id: "u2", name: "Markos", email: "markos@frontline.com", company: "Frontline", role: "Super Admin" },
+  { id: "u1", name: "Katrine", email: "katrine@cmb.com", company: "CMB", role: "Super Admin" },
+  { id: "u2", name: "Markos", email: "markos@cmb.com", company: "CMB", role: "Super Admin" },
   { id: "u3", name: "Colm", email: "colm@miagen.com", company: "Miagen", role: "Super Admin" },
   { id: "u4", name: "Lynne", email: "lynne@bs-shipping.com", company: "Bernard Schulte", role: "Ship Manager (Accounts)", scope: "MV Atlantic Star" },
   { id: "u5", name: "Joe", email: "joe@bs-shipping.com", company: "Bernard Schulte", role: "Ship Manager (Vessel Responsible)", scope: "MV Pacific Dawn" },
-  { id: "u6", name: "James", email: "james@frontline.com", company: "Frontline", role: "Fleet Manager" },
+  { id: "u6", name: "James", email: "james@cmb.com", company: "CMB", role: "Fleet Manager" },
   { id: "u7", name: "Marius", email: "marius@goldenocean.com", company: "Golden Ocean", role: "Reporting Group Admin", scope: "Golden Ocean" },
 ];
 
 const INITIAL_GROUPS: Group[] = [
-  { id: "g1", name: "Frontline", company: "Frontline", vessels: ["MV Atlantic Star", "MV Pacific Dawn", "MV Silver Wave"] },
+  { id: "g1", name: "CMB", company: "CMB", vessels: ["MV Atlantic Star", "MV Pacific Dawn", "MV Silver Wave"] },
   { id: "g2", name: "Golden Ocean", company: "Golden Ocean", vessels: ["MV Nordic Spirit", "MV Arctic Voyager"] },
   { id: "g3", name: "Avance", company: "Avance", vessels: ["MV Sahara Wind", "MV Coral Reef"] },
 ];

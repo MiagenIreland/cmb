@@ -34,7 +34,7 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/opex-reports")({
-  head: () => ({ meta: [{ title: "Opex Reports — Frontline Portal" }] }),
+  head: () => ({ meta: [{ title: "Opex Reports — CMB Portal" }] }),
   component: OpexReportsPage,
 });
 
