@@ -57,20 +57,14 @@ interface FormState {
 const EMPTY: FormState = { name: "", owner: "", shipManager: "", reportingGroup: "", status: "Active" };
 
 function VesselsPage() {
-  const { role, user } = useRole();
+  const { permissions, filterVessels } = useRole();
   const [rows, setRows] = useState(INITIAL);
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<FormState>(EMPTY);
 
-  const isSuperAdmin = role === "Super Admin";
+  const isSuperAdmin = permissions.isSuperAdmin;
 
-  const visible = useMemo(() => {
-    if (isSuperAdmin) return rows;
-    if (role === "Ship Manager") return rows.filter((r) => r.shipManager === user.company);
-    if (role === "Reporting Group") return rows.filter((r) => r.reportingGroup === "Tanker Group A");
-    // Approver
-    return rows.filter((r) => ["Tanker Group A", "Bulker Group B"].includes(r.reportingGroup));
-  }, [rows, role, user, isSuperAdmin]);
+  const visible = useMemo(() => filterVessels(rows), [rows, filterVessels]);
 
   const submit = () => {
     if (!form.name || !form.owner) {
