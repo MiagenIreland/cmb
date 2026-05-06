@@ -50,30 +50,9 @@ export const Route = createFileRoute("/chart-of-accounts")({
   component: CoAPage,
 });
 
-type Status = "Approved" | "Pending" | "Rejected";
-
-interface Mapping {
-  id: string;
-  smCode: string;
-  smDescription: string;
-  cmbCode: string;
-  cmbDescription: string;
-  status: Status;
-  shipManager: string;
-  comment?: string;
-}
+type Status = MappingStatus;
 
 const SHIP_MANAGERS = ["Oceanic Ship Mgmt", "Northern Marine", "Desert Shipping", "Tropic Marine"];
-
-const INITIAL: Mapping[] = [
-  { id: "1", smCode: "OSM-5010", smDescription: "Wages — Officers", cmbCode: "5010", cmbDescription: "Crew Wages", status: "Approved", shipManager: "Oceanic Ship Mgmt" },
-  { id: "2", smCode: "OSM-5020", smDescription: "Crew Travel Exp.", cmbCode: "5020", cmbDescription: "Crew Travel", status: "Approved", shipManager: "Oceanic Ship Mgmt" },
-  { id: "3", smCode: "NM-5110", smDescription: "Lub Oil Consumption", cmbCode: "5110", cmbDescription: "Lubricating Oil", status: "Pending", shipManager: "Northern Marine" },
-  { id: "4", smCode: "NM-5120-D", smDescription: "Deck Stores Issued", cmbCode: "5120", cmbDescription: "Stores — Deck", status: "Pending", shipManager: "Northern Marine" },
-  { id: "5", smCode: "DS-5210", smDescription: "Maint. & Survey", cmbCode: "5210", cmbDescription: "Repairs & Maintenance", status: "Pending", shipManager: "Desert Shipping" },
-  { id: "6", smCode: "TM-5410", smDescription: "Port Disbursements", cmbCode: "5410", cmbDescription: "Port Charges", status: "Rejected", shipManager: "Tropic Marine" },
-  { id: "7", smCode: "OSM-5310", smDescription: "Hull Insurance", cmbCode: "5310", cmbDescription: "Insurance — H&M", status: "Approved", shipManager: "Oceanic Ship Mgmt" },
-];
 
 const STATUS_CLASS: Record<Status, string> = {
   Approved: "bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300",
