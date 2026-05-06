@@ -1,4 +1,4 @@
-import { Bell } from "lucide-react";
+import { Bell, LogOut } from "lucide-react";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -11,7 +11,7 @@ import { useRole } from "@/lib/roles";
 import { NOTIFICATIONS } from "@/lib/mockData";
 
 export function TopBar() {
-  const { user, filterNotifications } = useRole();
+  const { user, logout, filterNotifications } = useRole();
   const notifications = filterNotifications(NOTIFICATIONS);
   return (
     <header className="h-14 border-b bg-background flex items-center justify-between px-4 sticky top-0 z-10">
@@ -23,6 +23,9 @@ export function TopBar() {
         <Badge variant="secondary" className="font-medium">
           {user.role}
         </Badge>
+        <Button variant="ghost" size="icon" onClick={logout} title="Sign out">
+          <LogOut className="h-5 w-5" />
+        </Button>
         <Popover>
           <PopoverTrigger asChild>
             <Button variant="ghost" size="icon" className="relative">
