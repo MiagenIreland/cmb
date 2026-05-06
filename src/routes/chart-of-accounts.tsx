@@ -90,15 +90,15 @@ interface FormState {
 const EMPTY_FORM: FormState = { smCode: "", smDescription: "", frontlineCode: "", frontlineDescription: "", comment: "" };
 
 function CoAPage() {
-  const { role, user } = useRole();
+  const { user, permissions } = useRole();
   const [rows, setRows] = useState<Mapping[]>(INITIAL);
   const [tab, setTab] = useState("mapping");
   const [dialogMode, setDialogMode] = useState<null | "add" | "remap">(null);
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
 
   const pending = useMemo(() => rows.filter((r) => r.status === "Pending"), [rows]);
-  const isShipManager = role === "Ship Manager";
-  const canApprove = role === "Approver" || role === "Super Admin";
+  const isShipManager = permissions.isShipManager;
+  const canApprove = permissions.canApprove;
 
   const updateStatus = (id: string, status: Status) => {
     setRows((rs) => rs.map((r) => (r.id === id ? { ...r, status } : r)));
