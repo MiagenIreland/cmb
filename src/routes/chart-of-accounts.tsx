@@ -33,6 +33,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useRole } from "@/lib/roles";
+import { logAudit } from "@/lib/audit";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
