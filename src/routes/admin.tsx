@@ -97,7 +97,7 @@ const INITIAL_GROUPS: Group[] = [
 ];
 
 function needsScope(role: AdminRole): "vessel" | "group" | null {
-  if (role === "Ship Manager (Accounts)" || role === "Ship Manager (Vessel Responsible)") return "vessel";
+  if (role === "Ship Manager") return "vessel";
   if (role === "Reporting Group Admin") return "group";
   return null;
 }
