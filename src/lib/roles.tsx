@@ -28,7 +28,7 @@ export interface RoleUser {
 const USERS: Record<Role, RoleUser> = {
   "Super Admin": {
     name: "Alex Morgan",
-    company: "CMB Maritime",
+    company: "CMB",
     role: "Super Admin",
   },
   "Ship Manager (Vessel Accounts)": {
@@ -45,12 +45,12 @@ const USERS: Record<Role, RoleUser> = {
   },
   Approver: {
     name: "Hiroshi Tanaka",
-    company: "CMB Maritime",
+    company: "CMB",
     role: "Approver",
   },
   "Reporting Group Admin": {
     name: "Elena Vasquez",
-    company: "CMB Maritime",
+    company: "CMB",
     role: "Reporting Group Admin",
     reportingGroup: "Tanker Group A",
   },
