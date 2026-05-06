@@ -34,6 +34,14 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useRole } from "@/lib/roles";
 import { logAudit } from "@/lib/audit";
+import {
+  addMapping,
+  batchApproveByManager,
+  updateMappingStatus,
+  useMappings,
+  type Mapping,
+  type MappingStatus,
+} from "@/lib/mappings";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
