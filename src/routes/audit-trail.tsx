@@ -20,8 +20,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { useRole } from "@/lib/roles";
-import { useAuditLog, type AuditAction } from "@/lib/audit";
+import { useAuditLog, type AuditAction, type AuditEntry } from "@/lib/audit";
 
 export const Route = createFileRoute("/audit-trail")({
   head: () => ({ meta: [{ title: "Audit Trail — CMB Portal" }] }),
