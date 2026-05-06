@@ -20,7 +20,7 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/balance-sheet")({
-  head: () => ({ meta: [{ title: "Balance Sheet Reports — Frontline Portal" }] }),
+  head: () => ({ meta: [{ title: "Balance Sheet Reports — CMB Portal" }] }),
   component: BalanceSheetPage,
 });
 

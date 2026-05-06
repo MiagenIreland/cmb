@@ -19,7 +19,7 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/vessels")({
-  head: () => ({ meta: [{ title: "Vessel Listing — Frontline Portal" }] }),
+  head: () => ({ meta: [{ title: "Vessel Listing — CMB Portal" }] }),
   component: VesselsPage,
 });
 
@@ -35,14 +35,14 @@ interface VesselRecord {
 }
 
 const INITIAL: VesselRecord[] = [
-  { id: "1", name: "MV Atlantic Star", owner: "Frontline Tankers", shipManager: "Oceanic Ship Mgmt", reportingGroup: "Tanker Group A", status: "Active" },
-  { id: "2", name: "MV Pacific Dawn", owner: "Frontline Tankers", shipManager: "Oceanic Ship Mgmt", reportingGroup: "Tanker Group A", status: "Active" },
-  { id: "3", name: "MV Nordic Spirit", owner: "Frontline Bulkers", shipManager: "Northern Marine", reportingGroup: "Bulker Group B", status: "Active" },
-  { id: "4", name: "MV Arctic Voyager", owner: "Frontline Bulkers", shipManager: "Northern Marine", reportingGroup: "Bulker Group B", status: "In Drydock" },
-  { id: "5", name: "MV Sahara Wind", owner: "Frontline Tankers", shipManager: "Desert Shipping", reportingGroup: "Tanker Group C", status: "Active" },
-  { id: "6", name: "MV Coral Reef", owner: "Frontline LNG", shipManager: "Tropic Marine", reportingGroup: "LNG Group", status: "Active" },
-  { id: "7", name: "MV Iron Maiden", owner: "Frontline Bulkers", shipManager: "Steelhull Co", reportingGroup: "Bulker Group B", status: "Laid Up" },
-  { id: "8", name: "MV Silver Wave", owner: "Frontline Tankers", shipManager: "Oceanic Ship Mgmt", reportingGroup: "Tanker Group A", status: "Active" },
+  { id: "1", name: "MV Atlantic Star", owner: "CMB Tankers", shipManager: "Oceanic Ship Mgmt", reportingGroup: "Tanker Group A", status: "Active" },
+  { id: "2", name: "MV Pacific Dawn", owner: "CMB Tankers", shipManager: "Oceanic Ship Mgmt", reportingGroup: "Tanker Group A", status: "Active" },
+  { id: "3", name: "MV Nordic Spirit", owner: "CMB Bulkers", shipManager: "Northern Marine", reportingGroup: "Bulker Group B", status: "Active" },
+  { id: "4", name: "MV Arctic Voyager", owner: "CMB Bulkers", shipManager: "Northern Marine", reportingGroup: "Bulker Group B", status: "In Drydock" },
+  { id: "5", name: "MV Sahara Wind", owner: "CMB Tankers", shipManager: "Desert Shipping", reportingGroup: "Tanker Group C", status: "Active" },
+  { id: "6", name: "MV Coral Reef", owner: "CMB LNG", shipManager: "Tropic Marine", reportingGroup: "LNG Group", status: "Active" },
+  { id: "7", name: "MV Iron Maiden", owner: "CMB Bulkers", shipManager: "Steelhull Co", reportingGroup: "Bulker Group B", status: "Laid Up" },
+  { id: "8", name: "MV Silver Wave", owner: "CMB Tankers", shipManager: "Oceanic Ship Mgmt", reportingGroup: "Tanker Group A", status: "Active" },
 ];
 
 const STATUS_CLASS: Record<VStatus, string> = {

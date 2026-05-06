@@ -45,7 +45,7 @@ export function AppSidebar() {
             <div className="h-8 w-8 rounded-md bg-primary flex items-center justify-center">
               <Ship className="h-4 w-4 text-primary-foreground" />
             </div>
-            <div className="font-semibold tracking-tight">Frontline Portal</div>
+            <div className="font-semibold tracking-tight">CMB Portal</div>
           </div>
         </div>
         <SidebarGroup>
