@@ -3,6 +3,7 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { TopBar } from "@/components/TopBar";
 import { RoleProvider } from "@/lib/roles";
+import { Toaster } from "@/components/ui/sonner";
 
 import appCss from "../styles.css?url";
 
@@ -59,6 +60,7 @@ function RootComponent() {
             </main>
           </div>
         </div>
+        <Toaster />
       </SidebarProvider>
     </RoleProvider>
   );
