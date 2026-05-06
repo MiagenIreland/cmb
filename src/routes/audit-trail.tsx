@@ -40,7 +40,6 @@ const ACTION_FILTERS: (AuditAction | "All")[] = [
   "Edit User",
   "Remove User",
   "Edit Group",
-  "Role Switched",
 ];
 
 function fmt(ts: string) {
