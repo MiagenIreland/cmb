@@ -36,21 +36,21 @@ const METRICS = [
 
 function HomePage() {
   const [period, setPeriod] = useState("May 2026");
-  const { role } = useRole();
+  const { role, permissions, filterVessels } = useRole();
+
+  const visibleVessels = filterVessels(VESSELS);
 
   const actionFor = (stage: string) => {
-    if (role === "Ship Manager") {
+    if (permissions.isShipManager) {
       if (stage === "Not Available") return "Start";
       if (stage.startsWith("Stage")) return "Continue";
       return null;
     }
     if (role === "Approver") {
-      if (stage === "Pending Review") return "Review";
-      return null;
+      return stage === "Pending Review" ? "Review" : null;
     }
-    if (role === "Reporting Group") {
-      if (stage === "Finalised") return "Export";
-      return null;
+    if (role === "Reporting Group Admin") {
+      return stage === "Finalised" ? "Export" : null;
     }
     // Super Admin sees everything
     if (stage === "Pending Review") return "Review";
@@ -117,7 +117,7 @@ function HomePage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {VESSELS.map((v) => {
+              {visibleVessels.map((v) => {
                 const action = actionFor(v.stage);
                 return (
                   <TableRow key={v.vessel}>
